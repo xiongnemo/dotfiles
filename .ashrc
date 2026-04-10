@@ -1,0 +1,161 @@
+export EFGH="ABCD"
+source ~/.profile
+
+# ====================================================
+#  Oh-My-Ash (Ultimate Edition for Windows BusyBox)
+#  Pure ASCII Version - Safe for all Locales
+# ====================================================
+
+# ----------------------------------------------------
+# 1. ANSI Color & Formatting Palette
+# ----------------------------------------------------
+# Standard Foreground
+BLACK='\033[0;30m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[0;37m'
+
+# Bright Foreground
+B_BLACK='\033[1;30m'
+B_RED='\033[1;31m'
+B_GREEN='\033[1;32m'
+B_YELLOW='\033[1;33m'
+B_BLUE='\033[1;34m'
+B_PURPLE='\033[1;35m'
+B_CYAN='\033[1;36m'
+B_WHITE='\033[1;37m'
+
+# Standard Background
+BG_BLACK='\033[40m'
+BG_RED='\033[41m'
+BG_GREEN='\033[42m'
+BG_YELLOW='\033[43m'
+BG_BLUE='\033[44m'
+BG_PURPLE='\033[45m'
+BG_CYAN='\033[46m'
+BG_WHITE='\033[47m'
+
+# Bright Background
+BG_B_BLACK='\033[100m'
+BG_B_RED='\033[101m'
+BG_B_GREEN='\033[102m'
+BG_B_YELLOW='\033[103m'
+BG_B_BLUE='\033[104m'
+BG_B_PURPLE='\033[105m'
+BG_B_CYAN='\033[106m'
+BG_B_WHITE='\033[107m'
+
+# Text Formatting
+BOLD='\033[1m'
+DIM='\033[2m'
+UNDERLINE='\033[4m'
+BLINK='\033[5m'
+INVERT='\033[7m'
+HIDDEN='\033[8m'
+RESET='\033[0m'
+
+# ----------------------------------------------------
+# 2. Useful Aliases
+# ----------------------------------------------------
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ~='cd ~'
+alias ls='ls --color=auto'
+alias ll='ls -al'
+alias la='ls -A'
+alias c='clear'
+alias h='history'
+alias grep='grep --color=auto'
+
+# Windows Specific
+alias explorer='explorer.exe'
+alias np='notepad.exe'
+
+# ----------------------------------------------------
+# 3. Functions
+# ----------------------------------------------------
+# Dynamic Prompt Information Wrapper (Git, Exit Code, Time)
+prompt_info() {
+    local rc=$1 # Capture the exit code of the last command immediately
+    local git_str=""
+    local rc_str=""
+    
+    # Check Git Status
+    local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    if [ -n "$branch" ]; then
+        local dirty=""
+        if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+            dirty="${B_YELLOW}*${RESET}"
+        fi
+        git_str=" git:(${B_RED}${branch}${dirty}${RESET})"
+    fi
+
+    # Check Return Code
+    if [ "$rc" != "0" ]; then
+        rc_str=" ${B_RED}C:${rc}${RESET}"
+    fi
+
+    # Output: Git -> Return Code -> Time
+    echo -n "${git_str}${rc_str} ${DIM}[$(date +%H:%M:%S)]${RESET}"
+}
+
+# Dynamic Prompt Symbol ( $ for normal user, % for root )
+prompt_symbol() {
+    if [ "$(id -u 2>/dev/null)" = "0" ]; then
+        echo "%"
+    else
+        echo "$"
+    fi
+}
+
+# Color & Format Testing Tool
+colortest() {
+    echo "=== ANSI Color Block Test ==="
+    echo ""
+    
+    # Standard Background
+    printf "${BG_BLACK}    ${RESET}${BG_RED}    ${RESET}${BG_GREEN}    ${RESET}${BG_YELLOW}    ${RESET}${BG_BLUE}    ${RESET}${BG_PURPLE}    ${RESET}${BG_CYAN}    ${RESET}${BG_WHITE}    ${RESET}\n"
+    
+    # Bright Background
+    printf "${BG_B_BLACK}    ${RESET}${BG_B_RED}    ${RESET}${BG_B_GREEN}    ${RESET}${BG_B_YELLOW}    ${RESET}${BG_B_BLUE}    ${RESET}${BG_B_PURPLE}    ${RESET}${BG_B_CYAN}    ${RESET}${BG_B_WHITE}    ${RESET}\n"
+    
+    echo ""
+    echo "=== Text Formatting Test ==="
+    printf "1. ${RESET}Normal${RESET}\n"
+    printf "2. ${BOLD}Bold / High Intensity${RESET}\n"
+    printf "3. ${DIM}Dim / Faint${RESET}\n"
+    printf "4. ${UNDERLINE}Underline${RESET}\n"
+    printf "5. ${BLINK}Blink${RESET}\n"
+    printf "6. ${INVERT}Invert${RESET}\n"
+    printf "7. Hidden: [${HIDDEN}Secret${RESET}]\n"
+    echo ""
+
+    echo "=== Common Combinations ==="
+    printf "${BOLD}${WHITE}${BG_RED} Bold White on Red (Error) ${RESET}\n"
+    printf "${BOLD}${BLACK}${BG_GREEN} Bold Black on Green (Success) ${RESET}\n"
+    printf "${UNDERLINE}${BLUE}${BG_YELLOW} Underlined Blue on Yellow (Warning) ${RESET}\n"
+    echo ""
+}
+
+# ----------------------------------------------------
+# 4. Custom Prompt (PS1)
+# ----------------------------------------------------
+# Note: NOT exported to prevent 'not found' errors in sub-shells like sudo
+# \$(prompt_info \$?) passes the last exit code into the info generator
+PS1="${B_BLUE}# \u${RESET} ${DIM}@${RESET} ${B_GREEN}\h${RESET} ${DIM}in${RESET} ${YELLOW}\w${RESET}\$(prompt_info \$?)\n${B_RED}\$(prompt_symbol)${RESET} "
+
+# ----------------------------------------------------
+# 5. Misc Settings
+# ----------------------------------------------------
+# Enable case-insensitive globbing (Highly recommended for Windows)
+set -o nocaseglob
+
+# Prevent accidental terminal exit with Ctrl+D (Optional safeguard)
+set -o ignoreeof
+
+# Uncomment the line below to enable vi key bindings for hard-core Vim users
+# set -o vi
